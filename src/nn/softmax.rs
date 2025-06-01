@@ -1,5 +1,5 @@
 pub trait Softmax {
-    fn softmax(&self, temperature: f64) -> Vec<f64>;
+    fn softmax(&self, temperature: f64) -> Self;
 }
 
 impl Softmax for Vec<f64> {
