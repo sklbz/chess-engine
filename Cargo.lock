@@ -17,7 +17,7 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 [[package]]
 name = "chess"
 version = "0.1.0"
-source = "git+https://github.com/sklbz/chess-board-representation?branch=master#60b8e3fdc69e1b6546ba9d0d588cbfcf35bcf582"
+source = "git+https://github.com/sklbz/chess-board-representation?branch=master#5935717917da77e2d4ac09c7ffe70a7eb808041e"
 
 [[package]]
 name = "chess-engine"
@@ -48,7 +48,7 @@ checksum = "d750af042f7ef4f724306de029d18836c26c1765a54a6a3f094cbd23a7267ffa"
 [[package]]
 name = "multilayer-perceptron"
 version = "0.1.0"
-source = "git+https://github.com/sklbz/multilayer-perceptron?branch=master#9a6bcff4bb31a6d4b3ab8537e47d204252aaa536"
+source = "git+https://github.com/sklbz/multilayer-perceptron?branch=master#ac19f25c826af5aa95d0af8f7cb9bcd9e6e36ffe"
 dependencies = [
  "rand",
 ]
