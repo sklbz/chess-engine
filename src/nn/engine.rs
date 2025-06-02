@@ -5,7 +5,7 @@ use chess::utils::move_to_string;
 use multilayer_perceptron::mlp::multilayer_perceptron::*;
 use rand::distr::Distribution;
 
-use super::distribution::ProbabilityDistribution;
+use super::distribution::{Display, ProbabilityDistribution};
 use super::relu::ReLU;
 use super::softmax::Softmax;
 
@@ -19,9 +19,10 @@ pub struct ChessEngine {
 impl ChessEngine {
     pub fn new() -> ChessEngine {
         // Inspiration from Stockfish NNUE architecture
-        let architecture = vec![768, 1024, 1536, 1792];
+        // let architecture = vec![768, 1024, 1536, 1792];
+        let simple_architecture = vec![768, 1792];
 
-        let engine = MultiLayerPerceptron::new(architecture);
+        let engine = MultiLayerPerceptron::new(simple_architecture);
 
         ChessEngine { mlp: engine }
     }
@@ -50,7 +51,7 @@ impl ChessEngine {
             .softmax(1.0);
 
         let distribution = ProbabilityDistribution::new(moves_indices, trimmed_output);
-        let move_index = distribution.sample(&mut rand::thread_rng());
+        let move_index = distribution.sample(&mut rand::rng());
 
         move_from(move_index).to_string()
     }

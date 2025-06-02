@@ -29,3 +29,15 @@ impl Distribution<usize> for ProbabilityDistribution {
         *self.values.last().unwrap()
     }
 }
+
+pub trait Display {
+    fn display(&self);
+}
+
+impl Display for ProbabilityDistribution {
+    fn display(&self) {
+        for (value, weight) in self.values.iter().zip(self.weights.iter()) {
+            println!("{}: {}", value, weight);
+        }
+    }
+}
