@@ -30,7 +30,9 @@ impl ChessEngine {
     pub fn predict(&self, board: &Board, color: &Color) -> String {
         let input: Vec<f64> = board.to_vector();
 
-        let raw_output: Vec<f64> = self.mlp.calc(input).relu();
+        let raw_output: Vec<f64> = self.mlp.calc(input);
+
+        let _rectified_output: Vec<f64> = raw_output.relu();
 
         let legal_moves: Vec<String> = board
             .get_legal_moves(color)
@@ -50,7 +52,10 @@ impl ChessEngine {
             .collect::<Vec<f64>>()
             .softmax(1.0);
 
-        let distribution = ProbabilityDistribution::new(moves_indices, trimmed_output);
+        let distribution = ProbabilityDistribution::new(moves_indices, trimmed_output, legal_moves);
+        //DEBUG-----------------------------------------------------------------------------------
+        distribution.display();
+        //----------------------------------------------------------------------------------------
         let move_index = distribution.sample(&mut rand::rng());
 
         move_from(move_index).to_string()

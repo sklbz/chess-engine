@@ -18,19 +18,26 @@ pub fn run() {
             break;
         }
 
-        while !is_possible(&board, &string_to_move(&input), Color::White) {
+        if !is_possible(&board, &string_to_move(&input), Color::White) {
             println!("Invalid move");
             continue;
         }
 
-        let _ = board.make_move_str(user_input().as_str());
+        board.make_move_str(input.as_str());
+        println!();
 
         if board.is_checkmate(Color::Black) {
             board.display();
             println!("White win by checkmate");
         }
 
-        let _ = board.make_move_str(engine.predict(&board, &Color::Black).as_str());
+        let engine_move = engine.predict(&board, &Color::Black);
+
+        if !is_possible(&board, &string_to_move(&engine_move), Color::Black) {
+            panic!("Engine made invalid move");
+        }
+
+        board.make_move_str(engine_move.as_str());
 
         if board.is_checkmate(Color::White) {
             board.display();

@@ -2,13 +2,22 @@ use rand::Rng;
 use rand::distr::Distribution;
 
 pub struct ProbabilityDistribution {
+    labels: Vec<String>,
     values: Vec<usize>,
     weights: Vec<f64>,
 }
 
 impl ProbabilityDistribution {
-    pub fn new(values: Vec<usize>, weights: Vec<f64>) -> ProbabilityDistribution {
-        ProbabilityDistribution { values, weights }
+    pub fn new(
+        values: Vec<usize>,
+        weights: Vec<f64>,
+        labels: Vec<String>,
+    ) -> ProbabilityDistribution {
+        ProbabilityDistribution {
+            labels,
+            values,
+            weights,
+        }
     }
 }
 
@@ -36,8 +45,8 @@ pub trait Display {
 
 impl Display for ProbabilityDistribution {
     fn display(&self) {
-        for (value, weight) in self.values.iter().zip(self.weights.iter()) {
-            println!("{}: {}", value, weight);
+        for (label, weight) in self.labels.iter().zip(self.weights.iter()) {
+            println!("{}: {:.3}", label, weight);
         }
     }
 }
