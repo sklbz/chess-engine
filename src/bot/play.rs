@@ -29,6 +29,7 @@ pub fn run() {
         if board.is_checkmate(Color::Black) {
             board.display();
             println!("White win by checkmate");
+            break;
         }
 
         let engine_move = engine.predict(&board, &Color::Black);
@@ -42,6 +43,7 @@ pub fn run() {
         if board.is_checkmate(Color::White) {
             board.display();
             println!("Black win by checkmate");
+            break;
         }
     }
 }
