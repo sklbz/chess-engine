@@ -5,9 +5,18 @@ use chess::{
     utils::{string_to_move, user_input},
 };
 
+use std::env::args;
+
 pub fn run() {
+    let args: Vec<String> = args().collect();
+
     let mut board = Board::init();
-    let engine = ChessEngine::new();
+    let mut engine = ChessEngine::new();
+
+    if args.len() > 1 {
+        println!("Training");
+        engine.train_from_file(&args[1]);
+    }
 
     loop {
         board.display();

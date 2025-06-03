@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
-use crate::move_to_number_conversion::generate_all_possible_move;
+use crate::utils::move_to_number_conversion::generate_all_possible_move;
 
 #[allow(dead_code)]
 pub fn listing() {

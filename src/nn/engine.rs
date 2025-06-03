@@ -3,14 +3,21 @@ use chess::board::nnue_input_vector::VectorOutput;
 use chess::legal_moves::misc::Color;
 use chess::utils::move_to_string;
 use multilayer_perceptron::mlp::multilayer_perceptron::*;
+use multilayer_perceptron::mlp::utils::Database;
 use rand::distr::Distribution;
 
 use super::distribution::{Display, ProbabilityDistribution};
 use super::relu::ReLU;
 use super::softmax::Softmax;
 
-use crate::move_to_number::move_hash;
-use crate::number_to_move::move_from;
+use crate::utils::move_to_number::move_hash;
+use crate::utils::move_to_output::move_vec;
+use crate::utils::number_to_move::move_from;
+
+use std::fs::File;
+use std::io::BufRead;
+use std::io::BufReader;
+use std::path::Path;
 
 pub struct ChessEngine {
     mlp: MultiLayerPerceptron,
@@ -59,5 +66,27 @@ impl ChessEngine {
         let move_index = distribution.sample(&mut rand::rng());
 
         move_from(move_index).to_string()
+    }
+
+    pub fn train_from_file(&mut self, file_path: &str) {
+        let mut data: Database = Vec::new();
+
+        let path = Path::new(file_path);
+        let file = File::open(path).expect("no such file");
+        let reader = BufReader::new(file);
+
+        for line in reader.lines() {
+            let mut board = Board::init();
+
+            let line = line.unwrap();
+            line.split_whitespace().for_each(|x| {
+                data.push((board.to_vector(), move_vec(x.to_string()), 1.0));
+                board.make_move_str(x);
+            })
+        }
+
+        println!("Training with {} examples", data.len());
+
+        self.mlp.backpropagation(data, 10, 0.1);
     }
 }
