@@ -13,8 +13,12 @@ impl ProbabilityDistribution {
         weights: Vec<f64>,
         labels: Vec<String>,
     ) -> ProbabilityDistribution {
-        if weights.iter().sum::<f64>() != 1.0 {
-            panic!("Weights do not sum to 1");
+        let total_probability_density: f64 = weights.iter().sum::<f64>();
+        if total_probability_density != 1.0 {
+            panic!(
+                "Weights do not sum to 1, sum: {}",
+                total_probability_density
+            );
         }
 
         ProbabilityDistribution {
