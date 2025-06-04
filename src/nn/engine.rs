@@ -37,9 +37,21 @@ impl ChessEngine {
     pub fn predict(&self, board: &Board, color: &Color) -> String {
         let input: Vec<f64> = board.to_vector();
 
+        // println!("Input: {:?}", input);
+
         let raw_output: Vec<f64> = self.mlp.calc(input);
 
-        let _rectified_output: Vec<f64> = raw_output.relu();
+        // println!("Raw output: {:?}", raw_output);
+
+        let lower_bound = 0.1f64.ln();
+        let upper_bound = f64::MAX.ln();
+
+        let bounded_output: Vec<f64> = raw_output
+            .iter()
+            .map(|x| x.clamp(lower_bound, upper_bound))
+            .collect();
+
+        let _rectified_output: Vec<f64> = bounded_output.relu();
 
         let legal_moves: Vec<String> = board
             .get_legal_moves(color)
@@ -53,10 +65,10 @@ impl ChessEngine {
 
         let temperature = 5.0;
 
-        let trimmed_output = raw_output
+        let trimmed_output = bounded_output
             .iter()
             .enumerate()
-            .filter(|(i, _)| moves_indices.contains(i))
+            .filter(|(i, _): &(usize, &f64)| moves_indices.contains(i))
             .map(|(_, x)| *x)
             .collect::<Vec<f64>>()
             .softmax(temperature);
@@ -89,6 +101,13 @@ impl ChessEngine {
 
         println!("Training with {} examples", data.len());
 
+        let start = std::time::Instant::now();
+
         self.mlp.backpropagation(data, 3, 0.5);
+
+        let training_time = start.elapsed().as_secs();
+        let minutes = training_time / 60;
+        let seconds = training_time % 60;
+        println!("Training took {} minutes and {} seconds", minutes, seconds);
     }
 }

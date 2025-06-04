@@ -14,9 +14,10 @@ impl ProbabilityDistribution {
         labels: Vec<String>,
     ) -> ProbabilityDistribution {
         let total_probability_density: f64 = weights.iter().sum::<f64>();
-        if total_probability_density != 1.0 {
+
+        if (total_probability_density - 1.0).abs() > 0.001 {
             panic!(
-                "Weights do not sum to 1, sum: {}",
+                "Weights do not sum up to 1, sum: {}",
                 total_probability_density
             );
         }
