@@ -26,10 +26,10 @@ pub struct ChessEngine {
 impl ChessEngine {
     pub fn new() -> ChessEngine {
         // Inspiration from Stockfish NNUE architecture
-        // let architecture = vec![768, 1024, 1536, 1792];
-        let simple_architecture = vec![768, 1792];
+        let architecture = vec![768, 1024, 1536, 1792];
+        // let simple_architecture = vec![768, 1792];
 
-        let engine = MultiLayerPerceptron::new(simple_architecture);
+        let engine = MultiLayerPerceptron::new(architecture);
 
         ChessEngine { mlp: engine }
     }
@@ -51,13 +51,15 @@ impl ChessEngine {
             .map(|mv| move_hash(mv))
             .collect::<Vec<usize>>();
 
+        let temperature = 5.0;
+
         let trimmed_output = raw_output
             .iter()
             .enumerate()
             .filter(|(i, _)| moves_indices.contains(i))
             .map(|(_, x)| *x)
             .collect::<Vec<f64>>()
-            .softmax(1.0);
+            .softmax(temperature);
 
         let distribution = ProbabilityDistribution::new(moves_indices, trimmed_output, legal_moves);
         //DEBUG-----------------------------------------------------------------------------------
@@ -87,6 +89,6 @@ impl ChessEngine {
 
         println!("Training with {} examples", data.len());
 
-        self.mlp.backpropagation(data, 10, 0.1);
+        self.mlp.backpropagation(data, 3, 0.5);
     }
 }

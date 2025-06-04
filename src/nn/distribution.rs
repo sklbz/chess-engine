@@ -13,6 +13,10 @@ impl ProbabilityDistribution {
         weights: Vec<f64>,
         labels: Vec<String>,
     ) -> ProbabilityDistribution {
+        if weights.iter().sum::<f64>() != 1.0 {
+            panic!("Weights do not sum to 1");
+        }
+
         ProbabilityDistribution {
             labels,
             values,
@@ -34,6 +38,10 @@ impl Distribution<usize> for ProbabilityDistribution {
             }
         }
 
+        println!(
+            "Failed to sample from distribution\nDefaulting to fallback\nThreshold: {}",
+            threshold
+        );
         // Fallback in case of rounding errors
         *self.values.last().unwrap()
     }
