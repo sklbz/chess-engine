@@ -6,8 +6,8 @@ pub fn run() {
     let mut engine = ChessEngine::new();
 
     let args: Vec<String> = args().collect();
-    if args.len() > 1 {
-        engine.load_model(&args[1]);
+    if args.len() > 3 {
+        engine.load_model(&args[3]);
     }
 
     if args.len() > 2 {
