@@ -15,10 +15,30 @@ pub fn softmax(input: Vec<f64>, temperature: f64) -> Vec<f64> {
     let sum: f64 = unnormalized.iter().sum();
 
     // println!("Unnormalized distribution: {:?}", unnormalized);
-    // println!("Sum: {}", sum);
+    println!("Sum: {}", sum);
 
-    if sum.is_infinite() || sum.is_nan() || sum == 0.0 {
-        println!("Returning uniform distribution");
+    if sum.is_infinite() {
+        let option_count = unnormalized.iter().filter(|x| x.is_infinite()).count();
+        println!(
+            "Sum is infinite, number of infinite values: {}, total number of values: {}",
+            option_count,
+            unnormalized.len()
+        );
+
+        /* return unnormalized
+        .iter()
+        .map(|x| {
+            if x.is_infinite() {
+                1.0 / option_count as f64
+            } else {
+                0.0
+            }
+        })
+        .collect(); */
+    }
+
+    if sum.is_nan() || sum == 0.0 {
+        println!("Sampling value from uniform distribution");
         return vec![1.0 / unnormalized.len() as f64; unnormalized.len()];
     }
 

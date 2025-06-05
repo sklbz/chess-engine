@@ -103,7 +103,7 @@ impl ChessEngine {
 
         let start = std::time::Instant::now();
 
-        self.mlp.backpropagation(data, 3, 0.5);
+        self.mlp.backpropagation(data, 1, 0.1);
 
         let training_time = start.elapsed().as_secs();
         let minutes = training_time / 60;
