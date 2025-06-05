@@ -2,7 +2,7 @@ use crate::nn::engine::ChessEngine;
 
 use std::env::args;
 
-pub fn run() {
+pub fn train() {
     let mut engine = ChessEngine::new();
 
     let args: Vec<String> = args().collect();
