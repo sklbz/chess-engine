@@ -104,7 +104,10 @@ impl ChessEngine {
 
         let start = std::time::Instant::now();
 
-        self.mlp.backpropagation(data, 1, 0.1);
+        for i in 0..5 {
+            let use_data: Vec<(Vec<f64>, Vec<f64>, f64)> = data.clone();
+            self.mlp.backpropagation(use_data, i, 0.1 / i as f64);
+        }
 
         let training_time = start.elapsed().as_secs();
         let minutes = training_time / 60;
