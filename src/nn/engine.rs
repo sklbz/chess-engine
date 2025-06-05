@@ -2,6 +2,7 @@ use chess::board::board::Board;
 use chess::board::nnue_input_vector::VectorOutput;
 use chess::legal_moves::misc::Color;
 use chess::utils::move_to_string;
+use multilayer_perceptron::mlp::io::Save;
 use multilayer_perceptron::mlp::multilayer_perceptron::*;
 use multilayer_perceptron::mlp::utils::Database;
 use rand::distr::Distribution;
@@ -109,6 +110,16 @@ impl ChessEngine {
         let minutes = training_time / 60;
         let seconds = training_time % 60;
         println!("Training took {} minutes and {} seconds", minutes, seconds);
+    }
+
+    pub fn save_model(&self, file_path: &str) {
+        println!("Saving model to {}", file_path);
+        self.mlp.save(file_path.to_string());
+    }
+
+    pub fn load_model(&mut self, file_path: &str) {
+        println!("Loading model from {}", file_path);
+        self.mlp = MultiLayerPerceptron::load(file_path.to_string());
     }
 
     pub fn load_params(&mut self, file_path: &str) {

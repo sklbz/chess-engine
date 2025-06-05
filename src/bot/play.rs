@@ -30,10 +30,7 @@ pub fn run() {
 
         if input.split_whitespace().next().unwrap() == "save" {
             let path = input.split_whitespace().last().unwrap();
-            let file = std::fs::File::create(path).unwrap();
-            std::io::BufWriter::new(file)
-                .write_all(engine.params().as_bytes())
-                .unwrap();
+            engine.save_model(path);
 
             println!("Parameters saved to {}", path);
             continue;
@@ -41,7 +38,7 @@ pub fn run() {
 
         if input.split_whitespace().next().unwrap() == "load" {
             let path = input.split_whitespace().last().unwrap();
-            engine.load_params(path);
+            engine.load_model(path);
 
             println!("Parameters loaded from {}", path);
             continue;
