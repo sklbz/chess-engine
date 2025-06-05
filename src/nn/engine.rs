@@ -110,4 +110,13 @@ impl ChessEngine {
         let seconds = training_time % 60;
         println!("Training took {} minutes and {} seconds", minutes, seconds);
     }
+
+    pub fn load_params(&mut self, file_path: &str) {
+        println!("Loading parameters from {}", file_path);
+        self.mlp.load_params(file_path);
+    }
+
+    pub fn params(&self) -> String {
+        self.mlp.params()
+    }
 }

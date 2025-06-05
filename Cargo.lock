@@ -49,7 +49,7 @@ checksum = "d750af042f7ef4f724306de029d18836c26c1765a54a6a3f094cbd23a7267ffa"
 [[package]]
 name = "multilayer-perceptron"
 version = "0.1.0"
-source = "git+https://github.com/sklbz/multilayer-perceptron?branch=master#4656c5d6711791b91f9449b34f2d9177ddb77095"
+source = "git+https://github.com/sklbz/multilayer-perceptron?branch=master#eb138cc17d16745319f2d0d8c688f94efa31d844"
 dependencies = [
  "rand",
 ]

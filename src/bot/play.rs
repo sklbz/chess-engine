@@ -6,6 +6,7 @@ use chess::{
 };
 
 use std::env::args;
+use std::io::Write;
 
 pub fn run() {
     let args: Vec<String> = args().collect();
@@ -25,6 +26,25 @@ pub fn run() {
 
         if input == "quit" {
             break;
+        }
+
+        if input.split_whitespace().next().unwrap() == "save" {
+            let path = input.split_whitespace().last().unwrap();
+            let file = std::fs::File::create(path).unwrap();
+            std::io::BufWriter::new(file)
+                .write_all(engine.params().as_bytes())
+                .unwrap();
+
+            println!("Parameters saved to {}", path);
+            continue;
+        }
+
+        if input.split_whitespace().next().unwrap() == "load" {
+            let path = input.split_whitespace().last().unwrap();
+            engine.load_params(path);
+
+            println!("Parameters loaded from {}", path);
+            continue;
         }
 
         if !is_possible(&board, &string_to_move(&input), Color::White) {
