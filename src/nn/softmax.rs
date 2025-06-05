@@ -9,9 +9,18 @@ impl Softmax for Vec<f64> {
 }
 
 pub fn softmax(input: Vec<f64>, temperature: f64) -> Vec<f64> {
+    /* for (i, val) in input.iter().enumerate() {
+        if val.is_nan() || val.is_infinite() {
+            println!("Problem at index {}: {}", i, val);
+        }
+    } */
     // println!("Pre-softmax distribution: {:?}", input);
 
-    let unnormalized: Vec<f64> = input.iter().map(|x| (x / temperature).exp()).collect();
+    let unnormalized: Vec<f64> = input
+        /* .stabilize() */
+        .iter()
+        .map(|x| (x / temperature).exp())
+        .collect();
     let sum: f64 = unnormalized.iter().sum();
 
     // println!("Unnormalized distribution: {:?}", unnormalized);
@@ -47,4 +56,15 @@ pub fn softmax(input: Vec<f64>, temperature: f64) -> Vec<f64> {
     // println!("Normalized distribution: {:?}", distribution);
 
     distribution
+}
+
+trait Stabilize {
+    fn stabilize(&self) -> Self;
+}
+
+impl Stabilize for Vec<f64> {
+    fn stabilize(&self) -> Vec<f64> {
+        let max = self.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+        self.iter().map(|x| x - max).collect()
+    }
 }

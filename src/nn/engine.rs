@@ -42,6 +42,16 @@ impl ChessEngine {
 
         let raw_output: Vec<f64> = self.mlp.calc(input);
 
+        for (i, val) in raw_output.iter().enumerate() {
+            if val.is_nan() || val.is_infinite() {
+                println!("Problem at index {}: {}", i, val);
+            }
+        }
+
+        let max = raw_output.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+        let min = raw_output.iter().cloned().fold(f64::INFINITY, f64::min);
+        println!("Output range before softmax: min = {}, max = {}", min, max);
+
         // println!("Raw output: {:?}", raw_output);
 
         let lower_bound = 0.1f64.ln();
@@ -101,17 +111,33 @@ impl ChessEngine {
         }
 
         println!("Training with {} examples", data.len());
+        println!();
 
         let start = std::time::Instant::now();
 
-        for i in 0..5 {
+        for i in 1..=6 {
+            let cycle_start = std::time::Instant::now();
+
             let use_data: Vec<(Vec<f64>, Vec<f64>, f64)> = data.clone();
-            self.mlp.backpropagation(use_data, i, 0.1 / i as f64);
+            self.mlp.backpropagation(use_data, i, 0.01 / i as f64);
+
+            let cycle_time = cycle_start.elapsed().as_secs();
+            let cycle_minutes = cycle_time / 60;
+            let cycle_seconds = cycle_time % 60;
+
+            println!(
+                "Cycle {} done, took {} minutes and {} seconds",
+                i - 1,
+                cycle_minutes,
+                cycle_seconds
+            );
         }
 
         let training_time = start.elapsed().as_secs();
         let minutes = training_time / 60;
         let seconds = training_time % 60;
+
+        println!();
         println!("Training took {} minutes and {} seconds", minutes, seconds);
     }
 
