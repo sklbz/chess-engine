@@ -111,22 +111,17 @@ impl ChessEngine {
 
         let start = std::time::Instant::now();
 
-        for i in 1..=6 {
+        for i in 0..=5 {
             let cycle_start = std::time::Instant::now();
 
             let use_data: Vec<(Vec<f64>, Vec<f64>, f64)> = data.clone();
-            self.mlp.backpropagation(use_data, i, 0.01 / i as f64);
+            self.mlp.backpropagation(use_data, 1, 0.0001);
 
             let cycle_time = cycle_start.elapsed().as_secs();
             let cycle_minutes = cycle_time / 60;
             let cycle_seconds = cycle_time % 60;
 
-            println!(
-                "Cycle {} done, took {} minutes and {} seconds",
-                i - 1,
-                cycle_minutes,
-                cycle_seconds
-            );
+            println!("Cycle {i} done, took {cycle_minutes} minutes and {cycle_seconds} seconds");
         }
 
         let training_time = start.elapsed().as_secs();
