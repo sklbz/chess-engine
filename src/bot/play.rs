@@ -28,6 +28,13 @@ pub fn run() {
             break;
         }
 
+        if input.split_whitespace().next().unwrap() == "train" {
+            let path = input.split_whitespace().last().unwrap();
+            engine.train_from_file(path);
+
+            continue;
+        }
+
         if input.split_whitespace().next().unwrap() == "save" {
             let path = input.split_whitespace().last().unwrap();
             engine.save_model(path);
