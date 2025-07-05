@@ -6,7 +6,6 @@ use chess::{
 };
 
 use std::env::args;
-use std::io::Write;
 
 pub fn run() {
     let args: Vec<String> = args().collect();
@@ -39,7 +38,7 @@ pub fn run() {
             let path = input.split_whitespace().last().unwrap();
             engine.save_model(path);
 
-            println!("Parameters saved to {}", path);
+            println!("Parameters saved to {path}");
             continue;
         }
 
@@ -47,7 +46,7 @@ pub fn run() {
             let path = input.split_whitespace().last().unwrap();
             engine.load_model(path);
 
-            println!("Parameters loaded from {}", path);
+            println!("Parameters loaded from {path}");
             continue;
         }
 

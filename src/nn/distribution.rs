@@ -16,10 +16,7 @@ impl ProbabilityDistribution {
         let total_probability_density: f64 = weights.iter().sum::<f64>();
 
         if (total_probability_density - 1.0).abs() > 0.001 {
-            panic!(
-                "Weights do not sum up to 1, sum: {}",
-                total_probability_density
-            );
+            panic!("Weights do not sum up to 1, sum: {total_probability_density}");
         }
 
         ProbabilityDistribution {
@@ -44,8 +41,7 @@ impl Distribution<usize> for ProbabilityDistribution {
         }
 
         println!(
-            "Failed to sample from distribution\nDefaulting to fallback\nThreshold: {}",
-            threshold
+            "Failed to sample from distribution\nDefaulting to fallback\nThreshold: {threshold}"
         );
         // Fallback in case of rounding errors
         *self.values.last().unwrap()
@@ -66,7 +62,7 @@ impl Display for ProbabilityDistribution {
         {
             let approximate_weight = (weight * 50.0).round() as usize;
             let bar = "█".repeat(approximate_weight);
-            println!("{}│{} {:.3}", label, bar, weight);
+            println!("{label}│{bar} {weight:.3}");
         }
     }
 }

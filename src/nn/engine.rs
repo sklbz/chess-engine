@@ -44,13 +44,9 @@ impl ChessEngine {
 
         for (i, val) in raw_output.iter().enumerate() {
             if val.is_nan() || val.is_infinite() {
-                println!("Problem at index {}: {}", i, val);
+                println!("Problem at index {i}: {val}");
             }
         }
-
-        let max = raw_output.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-        let min = raw_output.iter().cloned().fold(f64::INFINITY, f64::min);
-        println!("Output range before softmax: min = {}, max = {}", min, max);
 
         // println!("Raw output: {:?}", raw_output);
 
@@ -138,21 +134,21 @@ impl ChessEngine {
         let seconds = training_time % 60;
 
         println!();
-        println!("Training took {} minutes and {} seconds", minutes, seconds);
+        println!("Training took {minutes} minutes and {seconds} seconds");
     }
 
     pub fn save_model(&self, file_path: &str) {
-        println!("Saving model to {}", file_path);
+        println!("Saving model to {file_path}");
         self.mlp.save(file_path.to_string());
     }
 
     pub fn load_model(&mut self, file_path: &str) {
-        println!("Loading model from {}", file_path);
+        println!("Loading model from {file_path}");
         self.mlp = MultiLayerPerceptron::load(file_path.to_string());
     }
 
     pub fn load_params(&mut self, file_path: &str) {
-        println!("Loading parameters from {}", file_path);
+        println!("Loading parameters from {file_path}");
         self.mlp.load_params(file_path);
     }
 

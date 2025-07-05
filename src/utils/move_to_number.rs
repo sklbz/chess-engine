@@ -1792,6 +1792,6 @@ pub fn move_hash(move_: &str) -> usize {
         "h8e8" => 1789,
         "h8f8" => 1790,
         "h8g8" => 1791,
-        _ => panic!("Invalid move: {}", move_),
+        _ => panic!("Invalid move: {move_}"),
     }
 }

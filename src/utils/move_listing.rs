@@ -13,6 +13,6 @@ pub fn listing() {
     let moves = generate_all_possible_move();
 
     moves.iter().for_each(|mv| {
-        writeln!(output, "{}", mv).unwrap();
+        writeln!(output, "{mv}").unwrap();
     });
 }

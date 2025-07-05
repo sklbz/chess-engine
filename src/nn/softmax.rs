@@ -24,7 +24,7 @@ pub fn softmax(input: Vec<f64>, temperature: f64) -> Vec<f64> {
     let sum: f64 = unnormalized.iter().sum();
 
     // println!("Unnormalized distribution: {:?}", unnormalized);
-    println!("Sum: {}", sum);
+    println!("Sum: {sum}");
 
     if sum.is_infinite() {
         let option_count = unnormalized.iter().filter(|x| x.is_infinite()).count();
