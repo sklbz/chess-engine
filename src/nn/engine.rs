@@ -27,10 +27,10 @@ pub struct ChessEngine {
 impl ChessEngine {
     pub fn new() -> ChessEngine {
         // Inspiration from Stockfish NNUE architecture
-        let architecture = vec![768, 1024, 1536, 1792];
-        // let simple_architecture = vec![768, 1792];
+        // let architecture = vec![768, 1024, 1536, 1792];
+        let simple_architecture = vec![768, 1792];
 
-        let engine = MultiLayerPerceptron::new(architecture);
+        let engine = MultiLayerPerceptron::new(simple_architecture);
 
         ChessEngine { mlp: engine }
     }

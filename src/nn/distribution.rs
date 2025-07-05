@@ -54,7 +54,11 @@ pub trait Display {
 
 impl Display for ProbabilityDistribution {
     fn display(&self) {
-        for (label, weight) in self.labels.iter().zip(self.weights.iter())
+        for (label, weight) in self
+            .labels
+            .iter()
+            .zip(self.weights.iter())
+            .filter(|(_, w)| *w > &0.0)
         // .filter(|(_, w)| *w > &0.1)
         {
             let approximate_weight = (weight * 50.0).round() as usize;
