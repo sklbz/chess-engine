@@ -146,13 +146,4 @@ impl ChessEngine {
         println!("Loading model from {file_path}");
         self.mlp = MultiLayerPerceptron::load(file_path.to_string());
     }
-
-    pub fn load_params(&mut self, file_path: &str) {
-        println!("Loading parameters from {file_path}");
-        self.mlp.load_params(file_path);
-    }
-
-    pub fn params(&self) -> String {
-        self.mlp.params()
-    }
 }

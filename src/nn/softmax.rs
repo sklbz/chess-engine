@@ -57,14 +57,3 @@ pub fn softmax(input: Vec<f64>, temperature: f64) -> Vec<f64> {
 
     distribution
 }
-
-trait Stabilize {
-    fn stabilize(&self) -> Self;
-}
-
-impl Stabilize for Vec<f64> {
-    fn stabilize(&self) -> Vec<f64> {
-        let max = self.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-        self.iter().map(|x| x - max).collect()
-    }
-}
