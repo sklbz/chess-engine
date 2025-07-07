@@ -58,7 +58,7 @@ impl Display for ProbabilityDistribution {
             .labels
             .iter()
             .zip(self.weights.iter())
-            .filter(|(_, w)| *w > &0.0)
+            .filter(|(_, w)| *w > &0.0009)
         // .filter(|(_, w)| *w > &0.1)
         {
             let approximate_weight = (weight * 50.0).round() as usize;
