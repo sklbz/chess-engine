@@ -111,7 +111,7 @@ impl ChessEngine {
 
         let start = std::time::Instant::now();
 
-        for i in 0..=20 {
+        for i in 0..=100 {
             let cycle_start = std::time::Instant::now();
 
             let use_data: Vec<(Vec<f64>, Vec<f64>, f64)> = data.clone();
