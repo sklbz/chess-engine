@@ -5,5 +5,5 @@ edition = "2024"
 
 [dependencies]
 chess = { git = "https://github.com/sklbz/chess-board-representation", branch = "master" }
-multilayer-perceptron = { git = "https://github.com/sklbz/multilayer-perceptron", branch = "master" }
-rand = "0.9.1"
+multilayer-perceptron = { path = "/home/sklbz/code/multilayer-perceptron" }
+rand = "0.10.1"

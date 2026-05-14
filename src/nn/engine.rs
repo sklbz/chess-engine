@@ -2,8 +2,8 @@ use chess::board::board::Board;
 use chess::board::nnue_input_vector::VectorOutput;
 use chess::legal_moves::misc::Color;
 use chess::utils::move_to_string;
-use multilayer_perceptron::mlp::io::Save;
-use multilayer_perceptron::mlp::multilayer_perceptron::*;
+use multilayer_perceptron::mlp::multilayer_perceptron::MultiLayerPerceptron;
+use multilayer_perceptron::mlp::multilayer_perceptron::NeuralNetwork;
 use multilayer_perceptron::mlp::utils::Database;
 use rand::distr::Distribution;
 
@@ -28,17 +28,16 @@ impl ChessEngine {
     pub fn new() -> ChessEngine {
         // Inspiration from Stockfish NNUE architecture
         // let architecture = vec![768, 1024, 1536, 1792];
-        let simple_architecture = vec![768, 1792];
+        // let simple_architecture = vec![768, 1792];
+        let architecture = vec![768, 1024, 1536, 1792];
 
-        let engine = MultiLayerPerceptron::new(simple_architecture);
+        let engine = MultiLayerPerceptron::new(architecture);
 
         ChessEngine { mlp: engine }
     }
 
     pub fn predict(&self, board: &Board, color: &Color) -> String {
         let input: Vec<f64> = board.to_vector();
-
-        // println!("Input: {:?}", input);
 
         let raw_output: Vec<f64> = self.mlp.calc(input);
 
@@ -47,8 +46,6 @@ impl ChessEngine {
                 println!("Problem at index {i}: {val}");
             }
         }
-
-        // println!("Raw output: {:?}", raw_output);
 
         let lower_bound = 0.1f64.ln();
         let upper_bound = f64::MAX.ln();
@@ -70,7 +67,7 @@ impl ChessEngine {
             .map(|mv| move_hash(mv))
             .collect::<Vec<usize>>();
 
-        let temperature = 5.0;
+        let temperature = 2.0;
 
         let trimmed_output = bounded_output
             .iter()
@@ -89,6 +86,21 @@ impl ChessEngine {
         move_from(move_index).to_string()
     }
 
+    pub fn train_from_samples(&mut self, data: &Database) {
+        let cycle_amount = 1;
+        for i in 0..cycle_amount {
+            let cycle_start = std::time::Instant::now();
+
+            let use_data: Vec<(Vec<f64>, Vec<f64>, f64)> = data.clone();
+            self.mlp.backpropagation(use_data, 1, 0.005);
+
+            let cycle_time = cycle_start.elapsed().as_secs();
+            let cycle_minutes = cycle_time / 60;
+            let cycle_seconds = cycle_time % 60;
+
+            println!("Cycle {i} done, took {cycle_minutes} minutes and {cycle_seconds} seconds");
+        }
+    }
     pub fn train_from_file(&mut self, file_path: &str) {
         let mut data: Database = Vec::new();
 
@@ -96,7 +108,9 @@ impl ChessEngine {
         let file = File::open(path).expect("no such file");
         let reader = BufReader::new(file);
 
-        for line in reader.lines() {
+        println!("Reading file");
+        for (count, line) in reader.lines().enumerate() {
+            print!("\rProgress: {} lines", count);
             let mut board = Board::init();
 
             let line = line.unwrap();
@@ -106,16 +120,27 @@ impl ChessEngine {
             })
         }
 
-        println!("Training with {} examples", data.len());
         println!();
+
+        // print!("Desired cycle amount : ");
+
+        let cycle_amount = 3;
+        /*user_input()
+        .split_whitespace()
+        .next()
+        .unwrap()
+        .parse::<usize>()
+        .expect("unable to parse number of cycles");*/
+
+        println!("Training with {} examples", data.len());
 
         let start = std::time::Instant::now();
 
-        for i in 0..=100 {
+        for i in 0..=cycle_amount {
             let cycle_start = std::time::Instant::now();
 
             let use_data: Vec<(Vec<f64>, Vec<f64>, f64)> = data.clone();
-            self.mlp.backpropagation(use_data, 1, 0.0001);
+            self.mlp.backpropagation(use_data, 10, 0.001);
 
             let cycle_time = cycle_start.elapsed().as_secs();
             let cycle_minutes = cycle_time / 60;
@@ -132,13 +157,13 @@ impl ChessEngine {
         println!("Training took {minutes} minutes and {seconds} seconds");
     }
 
-    pub fn save_model(&self, file_path: &str) {
-        println!("Saving model to {file_path}");
-        self.mlp.save(file_path.to_string());
+    pub fn save_model(&self) {
+        println!("Saving model");
+        let _ = self.mlp.save().unwrap();
     }
 
     pub fn load_model(&mut self, file_path: &str) {
         println!("Loading model from {file_path}");
-        self.mlp = MultiLayerPerceptron::load(file_path.to_string());
+        self.mlp = MultiLayerPerceptron::load(file_path);
     }
 }
