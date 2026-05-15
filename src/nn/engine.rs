@@ -18,10 +18,13 @@ use crate::utils::number_to_move::move_from;
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
+use std::io::Write;
+use std::io::stdout;
 use std::path::Path;
 
 pub struct ChessEngine {
     mlp: MultiLayerPerceptron,
+    temp: f64,
 }
 
 impl ChessEngine {
@@ -33,7 +36,27 @@ impl ChessEngine {
 
         let engine = MultiLayerPerceptron::new(architecture);
 
-        ChessEngine { mlp: engine }
+        ChessEngine {
+            mlp: engine,
+            temp: 4.0,
+        }
+    }
+
+    pub fn get_temp(&self) -> f64 {
+        self.temp
+    }
+
+    pub fn set_temp(&mut self, temp: f64) -> f64 {
+        self.temp = temp.clamp(1., 10.);
+        self.temp
+    }
+
+    pub fn temp_up(&mut self) -> f64 {
+        self.set_temp(self.temp + 1.)
+    }
+
+    pub fn temp_down(&mut self) -> f64 {
+        self.set_temp(self.temp - 1.)
     }
 
     pub fn predict(&self, board: &Board, color: &Color) -> String {
@@ -67,7 +90,7 @@ impl ChessEngine {
             .map(|mv| move_hash(mv))
             .collect::<Vec<usize>>();
 
-        let temperature = 2.0;
+        let temperature = 5.0;
 
         let trimmed_output = bounded_output
             .iter()
@@ -78,7 +101,7 @@ impl ChessEngine {
             .softmax(temperature);
 
         let distribution = ProbabilityDistribution::new(moves_indices, trimmed_output, legal_moves);
-        //DEBUG-----------------------------------------------------------------------------------
+        // DEBUG----------------------------------------------------------------------------------
         distribution.display();
         //----------------------------------------------------------------------------------------
         let move_index = distribution.sample(&mut rand::rng());
@@ -91,8 +114,7 @@ impl ChessEngine {
         for i in 0..cycle_amount {
             let cycle_start = std::time::Instant::now();
 
-            let use_data: Vec<(Vec<f64>, Vec<f64>, f64)> = data.clone();
-            self.mlp.backpropagation(use_data, 1, 0.005);
+            self.mlp.backpropagation(data, 1, 0.005);
 
             let cycle_time = cycle_start.elapsed().as_secs();
             let cycle_minutes = cycle_time / 60;
@@ -108,9 +130,9 @@ impl ChessEngine {
         let file = File::open(path).expect("no such file");
         let reader = BufReader::new(file);
 
-        println!("Reading file");
-        for (count, line) in reader.lines().enumerate() {
-            print!("\rProgress: {} lines", count);
+        for line in reader.lines() {
+            stdout().flush().unwrap();
+
             let mut board = Board::init();
 
             let line = line.unwrap();
@@ -120,12 +142,13 @@ impl ChessEngine {
             })
         }
 
-        println!();
+        let n = data.len() as f64;
+        data.iter_mut().for_each(|(_, _, c)| *c = 1.0 / n);
 
         // print!("Desired cycle amount : ");
 
-        let cycle_amount = 3;
-        /*user_input()
+        /*
+        let cycle_amount = user_input()
         .split_whitespace()
         .next()
         .unwrap()
@@ -135,12 +158,14 @@ impl ChessEngine {
         println!("Training with {} examples", data.len());
 
         let start = std::time::Instant::now();
-
+        let learning_rate = 0.004;
+        self.mlp.backpropagation(&data, 50, learning_rate);
+        /*
         for i in 0..=cycle_amount {
             let cycle_start = std::time::Instant::now();
 
             let use_data: Vec<(Vec<f64>, Vec<f64>, f64)> = data.clone();
-            self.mlp.backpropagation(use_data, 10, 0.001);
+            self.mlp.backpropagation(use_data, 50, 0.001);
 
             let cycle_time = cycle_start.elapsed().as_secs();
             let cycle_minutes = cycle_time / 60;
@@ -148,6 +173,7 @@ impl ChessEngine {
 
             println!("Cycle {i} done, took {cycle_minutes} minutes and {cycle_seconds} seconds");
         }
+        */
 
         let training_time = start.elapsed().as_secs();
         let minutes = training_time / 60;
