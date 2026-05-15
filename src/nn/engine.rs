@@ -62,7 +62,7 @@ impl ChessEngine {
     pub fn predict(&self, board: &Board, color: &Color) -> String {
         let input: Vec<f64> = board.to_vector();
 
-        let raw_output: Vec<f64> = self.mlp.calc(input);
+        let raw_output: Vec<f64> = self.mlp.calc(&input);
 
         for (i, val) in raw_output.iter().enumerate() {
             if val.is_nan() || val.is_infinite() {
@@ -90,15 +90,13 @@ impl ChessEngine {
             .map(|mv| move_hash(mv))
             .collect::<Vec<usize>>();
 
-        let temperature = 5.0;
-
         let trimmed_output = bounded_output
             .iter()
             .enumerate()
             .filter(|(i, _): &(usize, &f64)| moves_indices.contains(i))
             .map(|(_, x)| *x)
             .collect::<Vec<f64>>()
-            .softmax(temperature);
+            .softmax(self.temp);
 
         let distribution = ProbabilityDistribution::new(moves_indices, trimmed_output, legal_moves);
         // DEBUG----------------------------------------------------------------------------------
@@ -137,7 +135,11 @@ impl ChessEngine {
 
             let line = line.unwrap();
             line.split_whitespace().for_each(|x| {
-                data.push((board.to_vector(), move_vec(x.to_string()), 1.0));
+                data.push((
+                    board.to_vector().into(),
+                    move_vec(x.to_string()).into(),
+                    1.0,
+                ));
                 board.make_move_str(x);
             })
         }
@@ -158,7 +160,7 @@ impl ChessEngine {
         println!("Training with {} examples", data.len());
 
         let start = std::time::Instant::now();
-        let learning_rate = 0.004;
+        let learning_rate = 0.0005;
         self.mlp.backpropagation(&data, 50, learning_rate);
         /*
         for i in 0..=cycle_amount {

@@ -1,1 +1,5 @@
 /target
+*.model.json
+*.model.json.xz
+compressed/
+models/
