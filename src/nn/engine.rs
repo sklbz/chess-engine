@@ -1,16 +1,21 @@
 use chess::board::board::Board;
 use chess::board::nnue_input_vector::VectorOutput;
 use chess::legal_moves::misc::Color;
+use chess::utils::flip_move;
 use chess::utils::move_to_string;
 use multilayer_perceptron::mlp::multilayer_perceptron::MultiLayerPerceptron;
 use multilayer_perceptron::mlp::multilayer_perceptron::NeuralNetwork;
 use multilayer_perceptron::mlp::utils::Database;
 use rand::distr::Distribution;
+use rayon::iter::IntoParallelRefMutIterator;
+use rayon::iter::ParallelIterator;
 
 use super::distribution::{Display, ProbabilityDistribution};
 use super::relu::ReLU;
 use super::softmax::Softmax;
 
+use crate::database::load_db;
+use crate::database::save_db;
 use crate::utils::move_to_number::move_hash;
 use crate::utils::move_to_output::move_vec;
 use crate::utils::number_to_move::move_from;
@@ -57,6 +62,51 @@ impl ChessEngine {
 
     pub fn temp_down(&mut self) -> f64 {
         self.set_temp(self.temp - 1.)
+    }
+
+    pub fn predict_symm(&self, board: &Board, color: &Color) -> String {
+        // Toujours du point de vue du joueur actif
+        let input: Vec<f64> = board.to_vector_for(color);
+
+        let raw_output: Vec<f64> = self.mlp.calc(&input);
+        let lower_bound = 0.1f64.ln();
+        let upper_bound = f64::MAX.ln();
+
+        let bounded_output: Vec<f64> = raw_output
+            .iter()
+            .map(|x| x.clamp(lower_bound, upper_bound))
+            .collect();
+
+        let _rectified_output: Vec<f64> = bounded_output.relu();
+        let legal_moves: Vec<String> = board
+            .get_legal_moves(color)
+            .iter()
+            .map(|mv| match color {
+                Color::Black => flip_move(move_to_string(mv)),
+                _ => move_to_string(mv),
+            })
+            .collect();
+        let moves_indices = legal_moves
+            .iter()
+            .map(|mv| move_hash(mv))
+            .collect::<Vec<usize>>();
+
+        let trimmed_output = bounded_output
+            .iter()
+            .enumerate()
+            .filter(|(i, _): &(usize, &f64)| moves_indices.contains(i))
+            .map(|(_, x)| *x)
+            .collect::<Vec<f64>>()
+            .softmax(self.temp);
+
+        let distribution = ProbabilityDistribution::new(moves_indices, trimmed_output, legal_moves);
+        let move_index = distribution.sample(&mut rand::rng());
+
+        let chosen = move_from(move_index).to_string();
+        match color {
+            Color::Black => flip_move(chosen),
+            _ => chosen,
+        }
     }
 
     pub fn predict(&self, board: &Board, color: &Color) -> String {
@@ -121,6 +171,56 @@ impl ChessEngine {
             println!("Cycle {i} done, took {cycle_minutes} minutes and {cycle_seconds} seconds");
         }
     }
+
+    pub fn auto_train(&mut self, file_path: &str) {
+        let db_path = format!("{file_path}.db");
+
+        let data_result = match Path::new(&db_path).is_file() {
+            true => load_db(&db_path),
+            false => save_db(file_path),
+        };
+
+        if let Ok(data) = data_result {
+            println!("Training with {} examples", data.len());
+            loop {
+                let start = std::time::Instant::now();
+                let learning_rate = 0.000075;
+                self.mlp.backpropagation(&data, 200, learning_rate);
+
+                let training_time = start.elapsed().as_secs();
+                let minutes = training_time / 60;
+                let seconds = training_time % 60;
+
+                println!();
+                println!("Training cycle took {minutes} minutes and {seconds} seconds");
+                self.save_model();
+            }
+        }
+    }
+
+    pub fn train_from_file_symm(&mut self, file_path: &str) {
+        let db_path = format!("{file_path}.db");
+
+        let data_result = match Path::new(&db_path).is_file() {
+            true => load_db(&db_path),
+            false => save_db(file_path),
+        };
+
+        if let Ok(data) = data_result {
+            println!("Training with {} examples", data.len());
+
+            let start = std::time::Instant::now();
+            let learning_rate = 0.0001;
+            self.mlp.backpropagation(&data, 100, learning_rate);
+
+            let training_time = start.elapsed().as_secs();
+            let minutes = training_time / 60;
+            let seconds = training_time % 60;
+
+            println!("\rTraining took {minutes} minutes and {seconds} seconds");
+        }
+    }
+
     pub fn train_from_file(&mut self, file_path: &str) {
         let mut data: Database = Vec::new();
 
@@ -186,7 +286,6 @@ impl ChessEngine {
     }
 
     pub fn save_model(&self) {
-        println!("Saving model");
         let _ = self.mlp.save().unwrap();
     }
 

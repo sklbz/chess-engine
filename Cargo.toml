@@ -7,3 +7,5 @@ edition = "2024"
 chess = { path = "../chess-board-representation" }
 multilayer-perceptron = { path = "/home/sklbz/code/multilayer-perceptron" }
 rand = "0.10.1"
+rayon = "*"
+bincode="2"
