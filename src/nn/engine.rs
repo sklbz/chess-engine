@@ -38,7 +38,7 @@ impl ChessEngine {
 
         ChessEngine {
             mlp: engine,
-            temp: 4.0,
+            temp: 1.0,
         }
     }
 
@@ -100,7 +100,7 @@ impl ChessEngine {
 
         let distribution = ProbabilityDistribution::new(moves_indices, trimmed_output, legal_moves);
         // DEBUG----------------------------------------------------------------------------------
-        distribution.display();
+        // distribution.display();
         //----------------------------------------------------------------------------------------
         let move_index = distribution.sample(&mut rand::rng());
 
@@ -160,8 +160,8 @@ impl ChessEngine {
         println!("Training with {} examples", data.len());
 
         let start = std::time::Instant::now();
-        let learning_rate = 0.0005;
-        self.mlp.backpropagation(&data, 50, learning_rate);
+        let learning_rate = 0.00005;
+        self.mlp.backpropagation(&data, 100, learning_rate);
         /*
         for i in 0..=cycle_amount {
             let cycle_start = std::time::Instant::now();

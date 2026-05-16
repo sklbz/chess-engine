@@ -1,16 +1,3 @@
-mod bot;
-mod nn;
-mod rl;
-mod train;
-mod utils;
-
-// use bot::play::run;
-use nn::engine::ChessEngine;
-use rl::data_generation::run;
-use train::carlsen::train;
-
-use std::env::args;
-
 use std::io::{BufRead, BufReader, Write};
 use std::process::{Command, Stdio};
 
@@ -19,6 +6,7 @@ enum Evaluation {
     Centipawns(i32),
     Mate(i32),
 }
+use Evaluation::*;
 
 fn parse_evaluation(line: &str) -> Option<Evaluation> {
     let parts: Vec<&str> = line.split_whitespace().collect();
@@ -28,11 +16,11 @@ fn parse_evaluation(line: &str) -> Option<Evaluation> {
             match window[1] {
                 "cp" => {
                     let value = window[2].parse::<i32>().ok()?;
-                    return Some(Evaluation::Centipawns(value));
+                    return Some(Centipawns(value));
                 }
                 "mate" => {
                     let value = window[2].parse::<i32>().ok()?;
-                    return Some(Evaluation::Mate(value));
+                    return Some(Mate(value));
                 }
                 _ => {}
             }
@@ -42,7 +30,7 @@ fn parse_evaluation(line: &str) -> Option<Evaluation> {
     None
 }
 
-fn evaluate_fen(fen: &str, depth: u8) -> Result<Evaluation, Box<dyn std::error::Error>> {
+pub fn evaluate_fen(fen: &str, depth: u8) -> Result<Evaluation, Box<dyn std::error::Error>> {
     let mut child = Command::new("stockfish")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -79,35 +67,18 @@ fn evaluate_fen(fen: &str, depth: u8) -> Result<Evaluation, Box<dyn std::error::
     latest_eval.ok_or_else(|| "No evaluation found".into())
 }
 
-fn main() {
+fn example() {
     let fen = "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 2 3";
 
     match evaluate_fen(fen, 12) {
-        Ok(Evaluation::Centipawns(cp)) => {
+        Ok(Centipawns(cp)) => {
             println!("Evaluation: {:.2}", cp as f32 / 100.0);
         }
-        Ok(Evaluation::Mate(moves)) => {
+        Ok(Mate(moves)) => {
             println!("Mate in {}", moves);
         }
         Err(e) => {
             eprintln!("Error: {}", e);
         }
-    }
-}
-
-fn main_run() {
-    run()
-}
-
-fn main_training() {
-    let mut model = ChessEngine::new();
-    model.train_from_file("../data/lichess-elite-short");
-    // model.save_model("models/lichess-elite-complex");
-
-    let args: Vec<String> = args().collect();
-    if args.len() > 1 {
-        train();
-    } else {
-        run();
     }
 }
